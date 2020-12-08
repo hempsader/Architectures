@@ -45,6 +45,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.architectures.R
+import com.example.architectures.main.SearActivityPresenter
+import com.example.architectures.main.SearhActivityContract
+import com.example.architectures.model.Movie
 import com.example.architectures.model.RemoteDataSource
 import com.example.architectures.model.TmdbResponse
 
@@ -55,13 +58,14 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
 
-class SearchActivity : AppCompatActivity() {
+class SearchActivity : AppCompatActivity(), SearhActivityContract.SearchActivityView {
   private val TAG = "SearchActivity"
   private lateinit var searchResultsRecyclerView: RecyclerView
   private lateinit var adapter: SearchAdapter
   private lateinit var noMoviesTextView: TextView
   private lateinit var progressBar: ProgressBar
   private lateinit var query: String
+  private lateinit var searchActivityPresenter: SearhActivityContract.SearchActivityPresenterInterface
 
   private var dataSource = RemoteDataSource()
   private val compositeDisposable = CompositeDisposable()
@@ -76,7 +80,7 @@ class SearchActivity : AppCompatActivity() {
 
     val intent = intent
     query = intent.getStringExtra(SEARCH_QUERY).toString()
-
+    searchActivityPresenter = SearActivityPresenter(this, RemoteDataSource())
     setupViews()
   }
 
@@ -96,12 +100,7 @@ class SearchActivity : AppCompatActivity() {
   }
 
   fun getSearchResults(query: String) {
-    val searchResultsDisposable = searchResultsObservable(query)
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribeWith(observer)
-
-    compositeDisposable.add(searchResultsDisposable)
+    searchActivityPresenter.fetchMovieList(query)
   }
 
   val searchResultsObservable: (String) -> Observable<TmdbResponse> = { query -> dataSource.searchResultsObservable(query) }
@@ -179,6 +178,18 @@ class SearchActivity : AppCompatActivity() {
 
   interface RecyclerItemListener {
     fun onItemClick(v: View, position: Int)
+  }
+
+  override fun getListMovies(movie: List<Movie>) {
+    TODO("Not yet implemented")
+  }
+
+  override fun error(message: String) {
+    TODO("Not yet implemented")
+  }
+
+  override fun success(message: String) {
+    TODO("Not yet implemented")
   }
 
 }
