@@ -29,7 +29,7 @@
  */
 
 
-package com.example.architectures
+package com.example.architectures.search
 
 import android.content.Context
 import android.view.LayoutInflater

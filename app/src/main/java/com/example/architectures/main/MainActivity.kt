@@ -29,7 +29,7 @@
  */
 
 
-package com.example.architectures
+package com.example.architectures.main
 
 import android.app.Activity
 import android.content.Intent
@@ -46,6 +46,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.architectures.R
+import com.example.architectures.add.AddMovieActivity
 import com.example.architectures.model.LocalDataSource
 import com.example.architectures.model.Movie
 
@@ -58,15 +59,15 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
 
-class MainActivity : AppCompatActivity() {
-
+class MainActivity : AppCompatActivity() , MainContract.ViewInterface {
+  private lateinit var mainPresenter: MainContract.PresenterInterface
   private lateinit var moviesRecyclerView: RecyclerView
   private var adapter: MainAdapter? = null
   private lateinit var fab: FloatingActionButton
   private lateinit var noMoviesLayout: LinearLayout
 
   private lateinit var dataSource: LocalDataSource
-  private val compositeDisposable = CompositeDisposable()
+
 
   private val TAG = "MainActivity"
 
@@ -75,17 +76,21 @@ class MainActivity : AppCompatActivity() {
     setContentView(R.layout.activity_main)
 
     setupViews()
+    setupPresenter()
   }
 
   override fun onStart() {
     super.onStart()
-    dataSource = LocalDataSource(application)
-    getMyMoviesList()
+    mainPresenter.getMoviesList()
   }
 
   override fun onStop() {
     super.onStop()
-    compositeDisposable.clear()
+  }
+
+  private fun setupPresenter(){
+    val dataSource = LocalDataSource(application)
+    mainPresenter = MainPresenter(this,dataSource)
   }
 
   private fun setupViews() {
@@ -95,45 +100,14 @@ class MainActivity : AppCompatActivity() {
     noMoviesLayout = findViewById(R.id.no_movies_layout)
     supportActionBar?.title = "Movies to Watch"
   }
-
-  private fun getMyMoviesList() {
-    val myMoviesDisposable = myMoviesObservable
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribeWith(observer)
-
-    compositeDisposable.add(myMoviesDisposable)
-  }
-
-  private val myMoviesObservable: Observable<List<Movie>>
-    get() = dataSource.allMovies
-
-
-  private val observer: DisposableObserver<List<Movie>>
-    get() = object : DisposableObserver<List<Movie>>() {
-
-      override fun onNext(movieList: List<Movie>) {
-        displayMovies(movieList)
-      }
-
-      override fun onError(@NonNull e: Throwable) {
-        Log.d(TAG, "Error$e")
-        e.printStackTrace()
-        displayError("Error fetching movie list")
-      }
-
-      override fun onComplete() {
-        Log.d(TAG, "Completed")
-      }
-    }
-
   fun displayMovies(movieList: List<Movie>?) {
     if (movieList == null || movieList.size == 0) {
       Log.d(TAG, "No movies to display")
       moviesRecyclerView.visibility = INVISIBLE
       noMoviesLayout.visibility = VISIBLE
     } else {
-      adapter = MainAdapter(movieList, this@MainActivity)
+      adapter =
+        MainAdapter(movieList, this@MainActivity)
       moviesRecyclerView.adapter = adapter
 
       moviesRecyclerView.visibility = VISIBLE
@@ -144,7 +118,9 @@ class MainActivity : AppCompatActivity() {
   //fab onClick
   fun goToAddMovieActivity(v: View) {
     val myIntent = Intent(this@MainActivity, AddMovieActivity::class.java)
-    startActivityForResult(myIntent, ADD_MOVIE_ACTIVITY_REQUEST_CODE)
+    startActivityForResult(myIntent,
+      ADD_MOVIE_ACTIVITY_REQUEST_CODE
+    )
   }
 
   override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -190,6 +166,8 @@ class MainActivity : AppCompatActivity() {
   companion object {
     const val ADD_MOVIE_ACTIVITY_REQUEST_CODE = 1
   }
+
+
 
 
 }

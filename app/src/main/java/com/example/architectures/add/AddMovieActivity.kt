@@ -28,7 +28,7 @@
  * THE SOFTWARE.
  */
 
-package com.example.architectures
+package com.example.architectures.add
 
 import android.app.Activity
 import android.content.Intent
@@ -40,6 +40,7 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.architectures.R
+import com.example.architectures.search.SearchActivity
 import com.example.architectures.model.LocalDataSource
 import com.example.architectures.model.Movie
 import com.example.architectures.network.RetrofitClient.TMDB_IMAGEURL
@@ -72,7 +73,9 @@ open class AddMovieActivity : AppCompatActivity() {
     val title = titleEditText.text.toString()
     val intent = Intent(this@AddMovieActivity, SearchActivity::class.java)
     intent.putExtra(SearchActivity.SEARCH_QUERY, title)
-    startActivityForResult(intent, SEARCH_MOVIE_ACTIVITY_REQUEST_CODE)
+    startActivityForResult(intent,
+        SEARCH_MOVIE_ACTIVITY_REQUEST_CODE
+    )
   }
 
   //addMovie onClick
