@@ -40,32 +40,39 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.architectures.R
+import com.example.architectures.main.AddMovieContract
+import com.example.architectures.main.AddMoviePresenter
 import com.example.architectures.search.SearchActivity
 import com.example.architectures.model.LocalDataSource
 import com.example.architectures.model.Movie
+import com.example.architectures.model.RemoteDataSource
 import com.example.architectures.network.RetrofitClient.TMDB_IMAGEURL
 
 
 
 import com.squareup.picasso.Picasso
 
-open class AddMovieActivity : AppCompatActivity() {
+open class AddMovieActivity : AppCompatActivity(), AddMovieContract.AddMovieInterface {
   private lateinit var titleEditText: EditText
   private lateinit var releaseDateEditText: EditText
   private lateinit var movieImageView: ImageView
-  private lateinit var dataSource: LocalDataSource
+  private lateinit var addMoviePresenter: AddMovieContract.AddMoviePresenterInterface
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_add_movie)
     setupViews()
-    dataSource = LocalDataSource(application)
+    setupPresenter()
   }
 
   fun setupViews() {
     titleEditText = findViewById(R.id.movie_title)
     releaseDateEditText = findViewById(R.id.movie_release_date)
     movieImageView = findViewById(R.id.movie_imageview)
+  }
+
+  private fun setupPresenter(){
+    addMoviePresenter = AddMoviePresenter(this, LocalDataSource(application))
   }
 
   //search onClick
@@ -87,12 +94,8 @@ open class AddMovieActivity : AppCompatActivity() {
       val title = titleEditText.text.toString()
       val releaseDate = releaseDateEditText.text.toString()
       val posterPath = if (movieImageView.tag != null) movieImageView.tag.toString() else ""
+      addMoviePresenter.addMovie(title,releaseDate,posterPath)
 
-      val movie = Movie(title = title, releaseDate = releaseDate, posterPath = posterPath)
-      dataSource.insert(movie)
-
-      setResult(Activity.RESULT_OK)
-      finish()
     }
   }
 
@@ -103,6 +106,7 @@ open class AddMovieActivity : AppCompatActivity() {
       titleEditText.setText(data?.getStringExtra(SearchActivity.EXTRA_TITLE))
       releaseDateEditText.setText(data?.getStringExtra(SearchActivity.EXTRA_RELEASE_DATE))
       movieImageView.tag = data?.getStringExtra(SearchActivity.EXTRA_POSTER_PATH)
+
       Picasso.get().load(TMDB_IMAGEURL + data?.getStringExtra(SearchActivity.EXTRA_POSTER_PATH)).into(movieImageView)
     }
   }
@@ -114,4 +118,19 @@ open class AddMovieActivity : AppCompatActivity() {
   companion object {
     const val SEARCH_MOVIE_ACTIVITY_REQUEST_CODE = 2
   }
+
+  override fun returnToMain() {
+    finish()
+    setResult(Activity.RESULT_OK)
+  }
+
+  override fun error(message: String) {
+    showToast(message)
+  }
+
+  override fun success(message: String) {
+    showToast(message)
+  }
+
+
 }

@@ -162,7 +162,7 @@ class SearchActivity : AppCompatActivity() {
   /**
    * Listener for clicks on tasks in the ListView.
    */
-  internal var itemListener: RecyclerItemListener = object :
+  private var itemListener: RecyclerItemListener = object :
       RecyclerItemListener {
     override fun onItemClick(view: View, position: Int) {
       val movie = adapter.getItemAtPosition(position)

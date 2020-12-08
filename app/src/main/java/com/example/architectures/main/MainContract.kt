@@ -5,6 +5,8 @@ import com.example.architectures.model.Movie
 class MainContract {
     interface PresenterInterface {
         fun getMoviesList()
+        fun stop()
+        fun deleteMovie(movie: Movie)
     }
 
     interface ViewInterface{

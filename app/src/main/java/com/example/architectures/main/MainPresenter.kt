@@ -39,4 +39,12 @@ class MainPresenter(private val viewInterface: MainContract.ViewInterface, priva
             .subscribeWith(observer)
         compositeDisposable.add(myMoviesDisposable)
     }
+
+    override fun stop() {
+        compositeDisposable.clear()
+    }
+
+    override fun deleteMovie(movie: Movie) {
+        dataSource.delete(movie)
+    }
 }

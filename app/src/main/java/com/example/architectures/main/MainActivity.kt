@@ -66,7 +66,7 @@ class MainActivity : AppCompatActivity() , MainContract.ViewInterface {
   private lateinit var fab: FloatingActionButton
   private lateinit var noMoviesLayout: LinearLayout
 
-  private lateinit var dataSource: LocalDataSource
+
 
 
   private val TAG = "MainActivity"
@@ -86,6 +86,7 @@ class MainActivity : AppCompatActivity() , MainContract.ViewInterface {
 
   override fun onStop() {
     super.onStop()
+    mainPresenter.stop()
   }
 
   private fun setupPresenter(){
@@ -100,20 +101,7 @@ class MainActivity : AppCompatActivity() , MainContract.ViewInterface {
     noMoviesLayout = findViewById(R.id.no_movies_layout)
     supportActionBar?.title = "Movies to Watch"
   }
-  fun displayMovies(movieList: List<Movie>?) {
-    if (movieList == null || movieList.size == 0) {
-      Log.d(TAG, "No movies to display")
-      moviesRecyclerView.visibility = INVISIBLE
-      noMoviesLayout.visibility = VISIBLE
-    } else {
-      adapter =
-        MainAdapter(movieList, this@MainActivity)
-      moviesRecyclerView.adapter = adapter
 
-      moviesRecyclerView.visibility = VISIBLE
-      noMoviesLayout.visibility = INVISIBLE
-    }
-  }
 
   //fab onClick
   fun goToAddMovieActivity(v: View) {
@@ -142,7 +130,7 @@ class MainActivity : AppCompatActivity() , MainContract.ViewInterface {
       val adapter = this.adapter
       if (adapter != null) {
         for (movie in adapter.selectedMovies) {
-          dataSource.delete(movie)
+          mainPresenter.deleteMovie(movie)
         }
         if (adapter.selectedMovies.size == 1) {
           showToast("Movie deleted")
@@ -159,9 +147,34 @@ class MainActivity : AppCompatActivity() , MainContract.ViewInterface {
     Toast.makeText(this@MainActivity, str, Toast.LENGTH_LONG).show()
   }
 
-  fun displayError(e: String) {
-    showToast(e)
+  override fun displayMovies(movieList: List<Movie>) {
+    if (movieList == null || movieList.size == 0) {
+      Log.d(TAG, "No movies to display")
+      moviesRecyclerView.visibility = INVISIBLE
+      noMoviesLayout.visibility = VISIBLE
+    } else {
+      adapter =
+        MainAdapter(movieList, this@MainActivity)
+      moviesRecyclerView.adapter = adapter
+
+      moviesRecyclerView.visibility = VISIBLE
+      noMoviesLayout.visibility = INVISIBLE
+    }
   }
+
+  override fun displayNoMovies() {
+    moviesRecyclerView.visibility = INVISIBLE
+   noMoviesLayout.visibility = View.VISIBLE
+  }
+
+  override fun displayMessage(message: String) {
+      displayMessage(message)
+  }
+
+  override fun displayError(message: String) {
+    showToast(message)
+  }
+
 
   companion object {
     const val ADD_MOVIE_ACTIVITY_REQUEST_CODE = 1
