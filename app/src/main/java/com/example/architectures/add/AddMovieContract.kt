@@ -1,4 +1,4 @@
-package com.example.architectures.main
+package com.example.architectures.add
 
 import com.example.architectures.model.Movie
 

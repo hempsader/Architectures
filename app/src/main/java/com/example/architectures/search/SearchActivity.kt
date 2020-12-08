@@ -34,7 +34,6 @@ package com.example.architectures.search
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
@@ -45,18 +44,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.architectures.R
-import com.example.architectures.main.SearActivityPresenter
-import com.example.architectures.main.SearhActivityContract
 import com.example.architectures.model.Movie
 import com.example.architectures.model.RemoteDataSource
-import com.example.architectures.model.TmdbResponse
-
-import io.reactivex.Observable
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.annotations.NonNull
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.observers.DisposableObserver
-import io.reactivex.schedulers.Schedulers
 
 class SearchActivity : AppCompatActivity(), SearhActivityContract.SearchActivityView {
   private val TAG = "SearchActivity"
@@ -67,8 +56,6 @@ class SearchActivity : AppCompatActivity(), SearhActivityContract.SearchActivity
   private lateinit var query: String
   private lateinit var searchActivityPresenter: SearhActivityContract.SearchActivityPresenterInterface
 
-  private var dataSource = RemoteDataSource()
-  private val compositeDisposable = CompositeDisposable()
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -77,10 +64,13 @@ class SearchActivity : AppCompatActivity(), SearhActivityContract.SearchActivity
     noMoviesTextView = findViewById(R.id.no_movies_textview)
     progressBar = findViewById(R.id.progress_bar)
 
-
     val intent = intent
     query = intent.getStringExtra(SEARCH_QUERY).toString()
-    searchActivityPresenter = SearActivityPresenter(this, RemoteDataSource())
+    searchActivityPresenter =
+      SearActivityPresenter(
+        this,
+        RemoteDataSource()
+      )
     setupViews()
   }
 
@@ -92,7 +82,7 @@ class SearchActivity : AppCompatActivity(), SearhActivityContract.SearchActivity
 
   override fun onStop() {
     super.onStop()
-    compositeDisposable.clear()
+    searchActivityPresenter.dispose()
   }
 
   private fun setupViews() {
@@ -103,52 +93,12 @@ class SearchActivity : AppCompatActivity(), SearhActivityContract.SearchActivity
     searchActivityPresenter.fetchMovieList(query)
   }
 
-  val searchResultsObservable: (String) -> Observable<TmdbResponse> = { query -> dataSource.searchResultsObservable(query) }
 
-  val observer: DisposableObserver<TmdbResponse>
-    get() = object : DisposableObserver<TmdbResponse>() {
-
-      override fun onNext(@NonNull tmdbResponse: TmdbResponse) {
-        Log.d(TAG, "OnNext" + tmdbResponse.totalResults)
-        displayResult(tmdbResponse)
-      }
-
-      override fun onError(@NonNull e: Throwable) {
-        Log.d(TAG, "Error$e")
-        e.printStackTrace()
-        displayError("Error fetching Movie Data")
-      }
-
-      override fun onComplete() {
-        Log.d(TAG, "Completed")
-      }
-    }
-
-  fun displayResult(tmdbResponse: TmdbResponse) {
-    progressBar.visibility = INVISIBLE
-
-    if (tmdbResponse.totalResults == null || tmdbResponse.totalResults == 0) {
-      searchResultsRecyclerView.visibility = INVISIBLE
-      noMoviesTextView.visibility = VISIBLE
-    } else {
-      adapter = SearchAdapter(
-        tmdbResponse.results
-          ?: arrayListOf(), this@SearchActivity, itemListener
-      )
-      searchResultsRecyclerView.adapter = adapter
-
-      searchResultsRecyclerView.visibility = VISIBLE
-      noMoviesTextView.visibility = INVISIBLE
-    }
-  }
 
   fun showToast(string: String) {
     Toast.makeText(this@SearchActivity, string, Toast.LENGTH_LONG).show()
   }
 
-  fun displayError(string: String) {
-    showToast(string)
-  }
 
   companion object {
 
@@ -181,16 +131,28 @@ class SearchActivity : AppCompatActivity(), SearhActivityContract.SearchActivity
   }
 
   override fun getListMovies(movie: List<Movie>) {
-    TODO("Not yet implemented")
+    progressBar.visibility = INVISIBLE
+
+    if (movie.size == 0) {
+      searchResultsRecyclerView.visibility = INVISIBLE
+      noMoviesTextView.visibility = VISIBLE
+    } else {
+      adapter = SearchAdapter(movie, this@SearchActivity, itemListener)
+      searchResultsRecyclerView.adapter = adapter
+      searchResultsRecyclerView.visibility = VISIBLE
+      noMoviesTextView.visibility = INVISIBLE
+    }
   }
 
   override fun error(message: String) {
-    TODO("Not yet implemented")
+    showToast(message)
   }
 
   override fun success(message: String) {
-    TODO("Not yet implemented")
+    showToast(message)
   }
+
+
 
 }
 

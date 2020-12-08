@@ -1,12 +1,14 @@
-package com.example.architectures.main
+package com.example.architectures.search
 
 import com.example.architectures.model.Movie
 import com.example.architectures.model.RemoteDataSource
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
 
-class SearActivityPresenter (private val searActivityInterface: SearhActivityContract.SearchActivityView, private val remoteDataSource: RemoteDataSource): SearhActivityContract.SearchActivityPresenterInterface{
+class SearActivityPresenter (private val searActivityInterface: SearhActivityContract.SearchActivityView, private val remoteDataSource: RemoteDataSource):
+    SearhActivityContract.SearchActivityPresenterInterface {
 
     private val listObservable: DisposableObserver<List<Movie>>
                 get() = object: DisposableObserver<List<Movie>>(){
@@ -23,15 +25,22 @@ class SearActivityPresenter (private val searActivityInterface: SearhActivityCon
                     }
                 }
 
+    private val compositeDisposal = CompositeDisposable()
+
 
     override fun fetchMovieList(query: String) {
-        remoteDataSource.searchResultsObservable(query)
+      val observer =   remoteDataSource.searchResultsObservable(query)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .map {
                 it.results
             }
-            .subscribe(listObservable)
+            .subscribeWith(listObservable)
+        compositeDisposal.add(observer)
+    }
+
+    override fun dispose() {
+        compositeDisposal.clear()
     }
 
 }

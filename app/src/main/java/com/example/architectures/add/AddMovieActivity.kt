@@ -40,12 +40,8 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.architectures.R
-import com.example.architectures.main.AddMovieContract
-import com.example.architectures.main.AddMoviePresenter
 import com.example.architectures.search.SearchActivity
 import com.example.architectures.model.LocalDataSource
-import com.example.architectures.model.Movie
-import com.example.architectures.model.RemoteDataSource
 import com.example.architectures.network.RetrofitClient.TMDB_IMAGEURL
 
 
@@ -72,7 +68,10 @@ open class AddMovieActivity : AppCompatActivity(), AddMovieContract.AddMovieInte
   }
 
   private fun setupPresenter(){
-    addMoviePresenter = AddMoviePresenter(this, LocalDataSource(application))
+    addMoviePresenter = AddMoviePresenter(
+      this,
+      LocalDataSource(application)
+    )
   }
 
   //search onClick
