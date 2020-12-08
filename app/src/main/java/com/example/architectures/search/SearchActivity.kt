@@ -29,7 +29,7 @@
  */
 
 
-package com.example.architectures
+package com.example.architectures.search
 
 import android.app.Activity
 import android.content.Intent
@@ -132,8 +132,10 @@ class SearchActivity : AppCompatActivity() {
       searchResultsRecyclerView.visibility = INVISIBLE
       noMoviesTextView.visibility = VISIBLE
     } else {
-      adapter = SearchAdapter(tmdbResponse.results
-              ?: arrayListOf(), this@SearchActivity, itemListener)
+      adapter = SearchAdapter(
+        tmdbResponse.results
+          ?: arrayListOf(), this@SearchActivity, itemListener
+      )
       searchResultsRecyclerView.adapter = adapter
 
       searchResultsRecyclerView.visibility = VISIBLE
@@ -160,7 +162,8 @@ class SearchActivity : AppCompatActivity() {
   /**
    * Listener for clicks on tasks in the ListView.
    */
-  internal var itemListener: RecyclerItemListener = object : RecyclerItemListener {
+  internal var itemListener: RecyclerItemListener = object :
+      RecyclerItemListener {
     override fun onItemClick(view: View, position: Int) {
       val movie = adapter.getItemAtPosition(position)
 
