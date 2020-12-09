@@ -69,7 +69,7 @@ class MainPresenterTest : BaseTest(){
         val myDeleteValue = deleteSingleMovie
         for(movie in myDeleteValue) {
             mainPresenter.deleteMovie(movie)
-            Mockito.doReturn(mockDataSource).`when`(mockDataSource.delete(movie))
+            Mockito.verify(mockDataSource).insert(movie)
         }
         Mockito.verify(mockActivity).displayMessage("Movie Deleted")
 
