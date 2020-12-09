@@ -4,10 +4,13 @@ import com.example.architectures.BaseTest
 import com.example.architectures.RxImmediateSchedulerRule
 import com.example.architectures.model.LocalDataSource
 import com.example.architectures.model.Movie
+import io.reactivex.Observable
 import org.junit.Before
 import org.junit.Rule
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoJUnitRunner
 
@@ -36,6 +39,31 @@ class MainPresenterTest : BaseTest(){
                 mockedData.add(Movie(title = "Title4", releaseDate = "ReleaseDate4",posterPath =  "PosterPath4"))
                 return mockedData
             }
+    @Test
+    fun testGetMyMovieList(){
+        val dummy = dummyMovies
+        Mockito.doReturn(Observable.just(dummy)).`when`(mockDataSource).allMovies
+        mainPresenter.getMoviesList()
+        Mockito.verify(mockDataSource).allMovies
+        Mockito.verify(mockActivity).displayMovies(dummy)
+    }
 
+    @Test
+    fun testGetMyMovieListEmpty(){
+        val dummy = ArrayList<Movie>()
+        Mockito.doReturn(Observable.just(dummy)).`when`(mockDataSource).allMovies
+        mainPresenter.getMoviesList()
+        Mockito.verify(mockDataSource).allMovies
+        Mockito.verify(mockActivity).displayMovies(dummy)
+    }
+
+    @Test
+    fun testDeleteMovie(){
+        val dummy = dummyMovies
+        Mockito.doReturn(mockDataSource.delete(dummy[0])).`when`(mockDataSource).delete(dummyMovies[0])
+        mainPresenter.deleteMovie(dummy[0])
+        Mockito.verify(mockDataSource).delete(dummy[0])
+        Mockito.verify(mockActivity).displayMovies(dummy)
+    }
 
 }
