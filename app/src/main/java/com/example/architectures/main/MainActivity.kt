@@ -133,9 +133,9 @@ class MainActivity : AppCompatActivity() , MainContract.ViewInterface {
           mainPresenter.deleteMovie(movie)
         }
         if (adapter.selectedMovies.size == 1) {
-          showToast("Movie deleted")
+          displayMessage("Movie deleted")
         } else if (adapter.selectedMovies.size > 1) {
-          showToast("Movies deleted")
+          displayMessage("Movies deleted")
         }
       }
     }
@@ -143,7 +143,7 @@ class MainActivity : AppCompatActivity() , MainContract.ViewInterface {
     return super.onOptionsItemSelected(item)
   }
 
-  fun showToast(str: String) {
+ private fun showToast(str: String) {
     Toast.makeText(this@MainActivity, str, Toast.LENGTH_LONG).show()
   }
 
@@ -168,11 +168,11 @@ class MainActivity : AppCompatActivity() , MainContract.ViewInterface {
   }
 
   override fun displayMessage(message: String) {
-      displayMessage(message)
+      showToast(message)
   }
 
   override fun displayError(message: String) {
-    showToast(message)
+      showToast(message)
   }
 
 

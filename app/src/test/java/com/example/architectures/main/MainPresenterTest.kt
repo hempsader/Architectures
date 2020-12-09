@@ -57,13 +57,22 @@ class MainPresenterTest : BaseTest(){
         Mockito.verify(mockActivity).displayMovies(dummy)
     }
 
+    val deleteSingleMovie: HashSet<Movie>
+        get()  {
+            val deleteMovieSet = HashSet<Movie>()
+            deleteMovieSet.add(dummyMovies.get(2))
+            return deleteMovieSet
+        }
+
     @Test
-    fun testDeleteMovie(){
-        val dummy = dummyMovies
-        Mockito.doReturn(mockDataSource.delete(dummy[0])).`when`(mockDataSource).delete(dummyMovies[0])
-        mainPresenter.deleteMovie(dummy[0])
-        Mockito.verify(mockDataSource).delete(dummy[0])
-        Mockito.verify(mockActivity).displayMovies(dummy)
+    fun testDeleteSingleMovie(){
+        val myDeleteValue = deleteSingleMovie
+        for(movie in myDeleteValue) {
+            mainPresenter.deleteMovie(movie)
+            Mockito.doReturn(mockDataSource).`when`(mockDataSource.delete(movie))
+        }
+        Mockito.verify(mockActivity).displayMessage("Movie Deleted")
+
     }
 
 }
